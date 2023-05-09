@@ -17,15 +17,20 @@ class ComponentsInline(admin.TabularInline):
 class RecipeAdmin(admin.ModelAdmin):
     list_display = ('id', 'author', 'name', 'text', 'cooking_time',)
     inlines = (ComponentsInline,)
+    search_fields = ('name',)
+    list_filter = ('pub_date', 'author', 'name', 'tags')
+    filter_horizontal = ('ingredients',)
 
 
 class TagAdmin(admin.ModelAdmin):
     list_display = ('id', 'name', 'color', 'slug',)
-
+    list_filter = ('name',)
+    search_fields = ('name',)
 
 class ComponentsAdmin(admin.ModelAdmin):
     list_display = ('id', 'recipe', 'ingredient', 'amount',)
-
+    list_filter = ('recipe', 'ingredient')
+    search_fields = ('name',)
 
 class ShoppingCartAdmin(admin.ModelAdmin):
     list_display = ('user', 'recipe')
