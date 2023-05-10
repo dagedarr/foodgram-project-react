@@ -162,8 +162,7 @@ class RecipeSerializer(serializers.ModelSerializer):
             for ingredient in validated_data["ingredients"]:
                 Component.objects.update_or_create(
                     recipe=Recipe.objects.get(pk=instance.id),
-                    ingredient=Ingredient.objects.get(
-                        pk=ingredient['ingredient']['id']),
+                    ingredient=ingredient['ingredient'],
                     amount=ingredient['amount']
                 )
         if validated_data["tags"]:
