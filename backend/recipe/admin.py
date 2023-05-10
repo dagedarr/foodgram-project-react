@@ -27,10 +27,12 @@ class TagAdmin(admin.ModelAdmin):
     list_filter = ('name',)
     search_fields = ('name',)
 
+
 class ComponentsAdmin(admin.ModelAdmin):
     list_display = ('id', 'recipe', 'ingredient', 'amount',)
     list_filter = ('recipe', 'ingredient')
     search_fields = ('name',)
+
 
 class ShoppingCartAdmin(admin.ModelAdmin):
     list_display = ('user', 'recipe')

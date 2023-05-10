@@ -6,7 +6,6 @@ from rest_framework.permissions import SAFE_METHODS
 from rest_framework.response import Response
 
 from api.pagination import CustomPagination
-
 from .models import Subscribe, User
 from .serializers import (SubscribeSerializer, UserCreateSerializer,
                           UserSerializer)

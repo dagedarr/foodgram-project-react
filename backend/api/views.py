@@ -10,7 +10,6 @@ from rest_framework.response import Response
 from api.pagination import CustomPagination
 from recipe.models import (Component, Favorite, Ingredient, Recipe,
                            ShoppingCart, Tag)
-
 from .serializers import (FavoriteSerializer, IngredientSerializer,
                           RecipeListSerializer, RecipeSerializer,
                           ShoppingCartSerializer, TagSerializer)
