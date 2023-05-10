@@ -90,12 +90,13 @@ class RecipeListSerializer(serializers.ModelSerializer):
 
 
 class ComponentCreateSerializer(serializers.ModelSerializer):
-    """Сериализатор для вывода ID и Amount при post/del/patch к рецепту."""
-    id = serializers.IntegerField(source='ingredient.id')
+    id = serializers.PrimaryKeyRelatedField(
+        source='ingredient', queryset=Ingredient.objects.all()
+    )
 
     class Meta:
         model = Component
-        fields = ('id', 'amount',)
+        fields = ('id', 'amount')
 
 
 class RecipeSerializer(serializers.ModelSerializer):
@@ -105,13 +106,8 @@ class RecipeSerializer(serializers.ModelSerializer):
     image = Base64ImageField()
     is_favorited = serializers.SerializerMethodField()
     is_in_shopping_cart = serializers.SerializerMethodField()
-    ingredients = ComponentCreateSerializer(
-        many=True,
-        write_only=True
-    )
-    author = serializers.HiddenField(
-        default=serializers.CurrentUserDefault()
-    )
+    ingredients = ComponentCreateSerializer(many=True)
+    author = AuthorSerializer(read_only=True)
 
     class Meta:
         model = Recipe
@@ -143,12 +139,12 @@ class RecipeSerializer(serializers.ModelSerializer):
         recipe.tags.set(tags)
 
         for ingredient in ingredients:
-            Component.objects.update_or_create(
+            Component.objects.create(
                 recipe=recipe,
-                ingredient=Ingredient.objects.get(
-                    pk=ingredient['ingredient']['id']),
+                ingredient=ingredient['ingredient'],
                 amount=ingredient['amount']
             )
+
         return recipe
 
     def update(self, instance, validated_data):

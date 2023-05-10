@@ -1,7 +1,6 @@
 import os
 
 from dotenv import load_dotenv
-from datetime import timedelta
 from pathlib import Path
 
 load_dotenv()
@@ -81,7 +80,7 @@ DATABASES = {
         'HOST': os.getenv('DB_HOST'),
         'PORT': os.getenv('DB_PORT')
     }
-} 
+}
 
 
 # Password validation

@@ -78,6 +78,11 @@ class RecipeViewSet(viewsets.ModelViewSet):
                 'Рецепт успешно удален из списка покупок',
                 status=status.HTTP_204_NO_CONTENT
             )
+        else:
+            return Response(
+                {'errors': 'Данный метод неразрешен'},
+                status=status.HTTP_405_METHOD_NOT_ALLOWED
+            )
 
     @action(detail=False,
             methods=['get'],
@@ -144,6 +149,11 @@ class RecipeViewSet(viewsets.ModelViewSet):
             return Response(
                 'Рецепт успешно удален из избранного',
                 status=status.HTTP_204_NO_CONTENT
+            )
+        else:
+            return Response(
+                {'errors': 'Данный метод неразрешен'},
+                status=status.HTTP_405_METHOD_NOT_ALLOWED
             )
 
 
