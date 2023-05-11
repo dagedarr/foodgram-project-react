@@ -1,3 +1,4 @@
+from django.core.exceptions import ValidationError
 from django.contrib import admin
 
 from .models import Ingredient, Component, Recipe, Tag, ShoppingCart, Favorite
@@ -15,11 +16,22 @@ class ComponentsInline(admin.TabularInline):
 
 
 class RecipeAdmin(admin.ModelAdmin):
-    list_display = ('id', 'author', 'name', 'text', 'cooking_time',)
+    list_display = ('id', 'author', 'name', 'text', 'cooking_time', 'favorite_count')
     inlines = (ComponentsInline,)
-    search_fields = ('name',)
+    search_fields = ('name', 'author__username', 'tags__name')
     list_filter = ('pub_date', 'author', 'name', 'tags')
     filter_horizontal = ('ingredients',)
+
+    def favorite_count(self, obj):
+        return obj.favorite.count()
+    
+    favorite_count.short_description = 'Количество подписок'
+
+    # Не нашел что такое min_num, но помогло пеереопределить данный метод
+    def save_model(self, request, obj, form, change):
+        if not obj.ingredients.exists():
+            raise ValidationError('Список ингредиентов должен быть заполнен')
+        super().save_model(request, obj, form, change)
 
 
 class TagAdmin(admin.ModelAdmin):
