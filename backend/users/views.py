@@ -25,8 +25,10 @@ class UserViewSet(viewsets.ModelViewSet):
             methods=['GET'],
             permission_classes=[permissions.IsAuthenticated])
     def me(self, request):
-        user = request.user
-        serializer = UserSerializer(user, context={'request': request})
+        serializer = UserSerializer(
+            request.user,
+            context={'request': request}
+        )
         return Response(serializer.data)
 
     @action(detail=False,
@@ -34,13 +36,13 @@ class UserViewSet(viewsets.ModelViewSet):
             permission_classes=(permissions.IsAuthenticated,))
     def set_password(self, request):
         serializer = SetPasswordSerializer(request.user, data=request.data)
-        if serializer.is_valid(raise_exception=True):
-            serializer.save()
-            return Response({'detail': 'Пароль успешно изменен'},
-                            status=status.HTTP_204_NO_CONTENT)
-        else:
-            return Response(serializer.errors,
-                            status=status.HTTP_400_BAD_REQUEST)
+        try:
+            serializer.is_valid(raise_exception=True)
+        except serializer.ValidationError as e:
+            return Response(e.detail, status=status.HTTP_400_BAD_REQUEST)
+        serializer.save()
+        return Response({'detail': 'Пароль успешно изменен'},
+                        status=status.HTTP_204_NO_CONTENT)
 
     @action(detail=True,
             methods=['post', 'delete'],
@@ -54,37 +56,38 @@ class UserViewSet(viewsets.ModelViewSet):
                 'user': user.id,
                 'author': kwargs.get('pk')
             }, context={"request": request})
-            if serializer.is_valid(raise_exception=True):
-                # Если подписка существет / подписываемся на себя - рейзим 400
-                if Subscribe.objects.filter(
-                        user=user,
-                        author=author).exists() or author == user:
-                    return Response(
-                        {'errors': 'Ошибка подписки(Вы уже подписаны или пытаетесь подписаться на себя)'},
-                        status=status.HTTP_400_BAD_REQUEST
-                    )
 
-                serializer.save(author=author, user=user)
-                return Response(serializer.data,
-                                status=status.HTTP_201_CREATED)
-            else:
-                return Response(serializer.errors,
-                                status=status.HTTP_400_BAD_REQUEST)
-        if request.method == 'DELETE':
-            if not Subscribe.objects.filter(
+            try:
+                serializer.is_valid(raise_exception=True)
+            except serializer.ValidationError as e:
+                return Response(e.detail, status=status.HTTP_400_BAD_REQUEST)
+            
+            # Если подписка существет / подписываемся на себя - рейзим 400
+            if Subscribe.objects.filter(
                     user=user,
-                    author=author).exists():
+                    author=author).exists() or author == user:
                 return Response(
-                    {'errors': 'Ошибка отписки (Вы не были подписаны)'},
+                    {'errors': 'Ошибка подписки(Вы уже подписаны или пытаетесь подписаться на себя)'},
                     status=status.HTTP_400_BAD_REQUEST
                 )
-            Subscribe.objects.get(
+            serializer.save(author=author, user=user)
+            return Response(serializer.data,
+                            status=status.HTTP_201_CREATED)
+
+        if not Subscribe.objects.filter(
                 user=user,
-                author=author).delete()
+                author=author).exists():
             return Response(
-                'Вы успешно отписаны',
-                status=status.HTTP_204_NO_CONTENT
+                {'errors': 'Ошибка отписки (Вы не были подписаны)'},
+                status=status.HTTP_400_BAD_REQUEST
             )
+        Subscribe.objects.get(
+            user=user,
+            author=author).delete()
+        return Response(
+            'Вы успешно отписаны',
+            status=status.HTTP_204_NO_CONTENT
+        )
 
     @action(detail=False,
             methods=['get'],
