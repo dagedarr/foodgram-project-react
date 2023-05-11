@@ -7,6 +7,8 @@ from recipe.models import (Component, Favorite, Ingredient, Recipe,
                            ShoppingCart, Tag)
 from users.models import Subscribe, User
 
+from .utils import ingredients_set
+
 
 class Base64ImageField(serializers.ImageField):
     def to_internal_value(self, data):
@@ -93,6 +95,7 @@ class ComponentCreateSerializer(serializers.ModelSerializer):
     id = serializers.PrimaryKeyRelatedField(
         source='ingredient', queryset=Ingredient.objects.all()
     )
+    amount = serializers.IntegerField()
 
     class Meta:
         model = Component
@@ -131,19 +134,42 @@ class RecipeSerializer(serializers.ModelSerializer):
             user=user.id,
             recipe=obj).exists()
 
+    def validate(self, data):
+        ingredients = self.initial_data.get('ingredients')
+        tags = self.initial_data.get('tags')
+        cooking_time = self.initial_data.get('cooking_time')
+
+        if not ingredients:
+            raise serializers.ValidationError('Вы не указали ингредиенты')
+        if not tags:
+            raise serializers.ValidationError('Вы не указали категории')
+
+        cached_ingredient_id = []
+        for ingredient in ingredients:
+            if ingredient['id'] in cached_ingredient_id:
+                raise serializers.ValidationError('Ингредиенты не могут повторяться')
+            cached_ingredient_id.append(ingredient['id'])
+
+            if ingredient['amount'] <= 0:
+                raise serializers.ValidationError('Некорректный ввод количества ингредиентов')
+
+        if cooking_time <= 0:
+            raise serializers.ValidationError('Некорректный ввод времени готовки')
+        return data
+
     def create(self, validated_data):
         """При POST-запросе создаем объект Рецепт, добавляем в него теги и компоненты."""
-        ingredients = validated_data.pop('ingredients')
+        ingredients_data = validated_data.pop('ingredients')
         tags = validated_data.pop('tags')
-        recipe = Recipe.objects.create(**validated_data)
+        recipe = Recipe.objects.create(
+            **validated_data,
+            author=self.context.get('request').user
+        )
         recipe.tags.set(tags)
-
-        for ingredient in ingredients:
-            Component.objects.create(
-                recipe=recipe,
-                ingredient=ingredient['ingredient'],
-                amount=ingredient['amount']
-            )
+        ingredients_set(
+            recipe=recipe,
+            ingredients_data=ingredients_data
+        )
 
         return recipe
 
@@ -159,12 +185,11 @@ class RecipeSerializer(serializers.ModelSerializer):
             # Удаляем старые компоненты
             instance.ingredients.clear()
             # Устанавливаем новые
-            for ingredient in validated_data["ingredients"]:
-                Component.objects.update_or_create(
-                    recipe=Recipe.objects.get(pk=instance.id),
-                    ingredient=ingredient['ingredient'],
-                    amount=ingredient['amount']
-                )
+            ingredients_set(
+                recipe=Recipe.objects.get(pk=instance.id),
+                ingredients_data=validated_data["ingredients"]
+            )
+
         if validated_data["tags"]:
             instance.tags.clear()
             instance.tags.set(validated_data["tags"])
@@ -183,13 +208,13 @@ class ShoppingCartSerializer(serializers.ModelSerializer):
     image = serializers.ImageField(
         source='recipe.image',
         read_only=True)
-    coocking_time = serializers.IntegerField(
+    cooking_time = serializers.IntegerField(
         source='recipe.cooking_time',
         read_only=True)
 
     class Meta:
         model = ShoppingCart
-        fields = ('id', 'name', 'image', 'coocking_time')
+        fields = ('id', 'name', 'image', 'cooking_time')
 
 
 class FavoriteSerializer(serializers.ModelSerializer):
