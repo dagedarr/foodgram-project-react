@@ -6,7 +6,6 @@ from rest_framework import serializers
 from recipe.models import (Component, Favorite, Ingredient, Recipe,
                            ShoppingCart, Tag)
 from users.models import Subscribe, User
-
 from .utils import ingredients_set
 
 
@@ -80,12 +79,16 @@ class RecipeListSerializer(serializers.ModelSerializer):
 
     def get_is_favorited(self, obj):
         user = self.context.get('request').user
+        if user.is_anonymous:
+            return False
         return Favorite.objects.filter(
             user=user.id,
             recipe=obj).exists()
 
     def get_is_in_shopping_cart(self, obj):
         user = self.context.get('request').user
+        if user.is_anonymous:
+            return False
         return ShoppingCart.objects.filter(
             user=user.id,
             recipe=obj).exists()
@@ -144,21 +147,30 @@ class RecipeSerializer(serializers.ModelSerializer):
         if not tags:
             raise serializers.ValidationError('Вы не указали категории')
 
-        cached_ingredient_id = []
+        cached_ingredient_id = set()
         for ingredient in ingredients:
             if ingredient['id'] in cached_ingredient_id:
-                raise serializers.ValidationError('Ингредиенты не могут повторяться')
-            cached_ingredient_id.append(ingredient['id'])
+                raise serializers.ValidationError(
+                    'Ингредиенты не могут повторяться'
+                )
+            cached_ingredient_id.add(ingredient['id'])
 
             if ingredient['amount'] <= 0:
-                raise serializers.ValidationError('Некорректный ввод количества ингредиентов')
+                raise serializers.ValidationError(
+                    'Некорректный ввод количества ингредиентов'
+                )
 
         if cooking_time <= 0:
-            raise serializers.ValidationError('Некорректный ввод времени готовки')
+            raise serializers.ValidationError(
+                'Некорректный ввод времени готовки'
+            )
         return data
 
     def create(self, validated_data):
-        """При POST-запросе создаем объект Рецепт, добавляем в него теги и компоненты."""
+        """
+        При POST-запросе создаем объект Рецепт,
+        добавляем в него теги и компоненты.
+        """
         ingredients_data = validated_data.pop('ingredients')
         tags = validated_data.pop('tags')
         recipe = Recipe.objects.create(
@@ -175,24 +187,24 @@ class RecipeSerializer(serializers.ModelSerializer):
 
     def update(self, instance, validated_data):
         """При PATCH-запросе переопределяем поля рецепта на новые."""
-        instance.image = validated_data.get("image", instance.image)
-        instance.name = validated_data.get("name", instance.name)
-        instance.text = validated_data.get("text", instance.text)
+        instance.image = validated_data.get('image', instance.image)
+        instance.name = validated_data.get('name', instance.name)
+        instance.text = validated_data.get('text', instance.text)
         instance.cooking_time = validated_data.get(
-            "cooking_time", instance.cooking_time)
+            'cooking_time', instance.cooking_time)
 
-        if validated_data["ingredients"]:
+        if validated_data['ingredients']:
             # Удаляем старые компоненты
             instance.ingredients.clear()
             # Устанавливаем новые
             ingredients_set(
                 recipe=Recipe.objects.get(pk=instance.id),
-                ingredients_data=validated_data["ingredients"]
+                ingredients_data=validated_data['ingredients']
             )
 
-        if validated_data["tags"]:
+        if validated_data['tags']:
             instance.tags.clear()
-            instance.tags.set(validated_data["tags"])
+            instance.tags.set(validated_data['tags'])
 
         instance.save()
         return instance
