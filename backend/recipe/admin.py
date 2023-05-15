@@ -1,7 +1,7 @@
-from django.core.exceptions import ValidationError
 from django.contrib import admin
+from django.core.exceptions import ValidationError
 
-from .models import Ingredient, Component, Recipe, Tag, ShoppingCart, Favorite
+from .models import Component, Favorite, Ingredient, Recipe, ShoppingCart, Tag
 
 
 class IngredientAdmin(admin.ModelAdmin):
@@ -16,7 +16,8 @@ class ComponentsInline(admin.TabularInline):
 
 
 class RecipeAdmin(admin.ModelAdmin):
-    list_display = ('id', 'author', 'name', 'text', 'cooking_time', 'favorite_count')
+    list_display = ('id', 'author', 'name', 'text',
+                    'cooking_time', 'favorite_count')
     inlines = (ComponentsInline,)
     search_fields = ('name', 'author__username', 'tags__name')
     list_filter = ('pub_date', 'author', 'name', 'tags')
@@ -24,7 +25,7 @@ class RecipeAdmin(admin.ModelAdmin):
 
     def favorite_count(self, obj):
         return obj.favorite.count()
-    
+
     favorite_count.short_description = 'Количество подписок'
 
     # Не нашел что такое min_num, но помогло пеереопределить данный метод

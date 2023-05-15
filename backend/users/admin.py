@@ -8,6 +8,7 @@ class UserAdmin(admin.ModelAdmin):
     search_fields = ('username', 'email')
     list_filter = ('username', 'email',)
 
+
 class SubscribeAdmin(admin.ModelAdmin):
     list_display = ('id', 'user', 'author',)
     list_filter = ('author',)

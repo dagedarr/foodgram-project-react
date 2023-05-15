@@ -1,7 +1,6 @@
+from api.serializers import RecipeForSubscribeSerializer
 from rest_framework import serializers
 
-from api.serializers import RecipeForSubscribeSerializer
-from recipe.models import Recipe
 from .models import Subscribe, User
 
 

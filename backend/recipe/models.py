@@ -1,6 +1,5 @@
 from django.core.validators import MinValueValidator
 from django.db import models
-
 from users.models import User
 
 COLOR = (
@@ -20,37 +19,38 @@ class Recipe(models.Model):
         verbose_name='Автор публикации',
         related_name='recipies',
         on_delete=models.CASCADE,
-        )
+    )
     name = models.CharField(
         verbose_name='Название',
         max_length=200,
         db_index=True,
-        )
+    )
     image = models.ImageField(
         verbose_name='Картинка',
         upload_to='media/',
-        )
+    )
     text = models.TextField(
         verbose_name='Описание рецепта'
-        )
+    )
     ingredients = models.ManyToManyField(
         'Ingredient',
         through='Component',
         verbose_name='Ингредиенты',
         related_name='recipies',
-        )
+    )
     tags = models.ManyToManyField(
         'Tag',
         verbose_name='Тег',
         related_name='recipies',
-        )
+    )
     cooking_time = models.PositiveSmallIntegerField(
         verbose_name='Время приготовления(мин.)',
         validators=[MinValueValidator(1)],
-        )
+    )
     pub_date = models.DateTimeField(
         verbose_name='Дата публикации',
-        auto_now_add=True)
+        auto_now_add=True
+    )
 
     class Meta:
         ordering = ['-pub_date']
@@ -67,13 +67,13 @@ class Tag(models.Model):
         verbose_name='Название тега',
         max_length=200,
         unique=True,
-        )
+    )
     color = models.CharField(
         verbose_name='Цветовой HEX-код',
         max_length=7,
         choices=COLOR,
         unique=True,
-        )
+    )
     slug = models.SlugField(
         verbose_name='Слаг',
         max_length=200,
@@ -94,12 +94,12 @@ class Ingredient(models.Model):
         max_length=200,
         blank=False,
         db_index=True,
-        )
+    )
     measurement_unit = models.CharField(
         verbose_name='Единица измерения',
         blank=False,
         max_length=200,
-        )
+    )
 
     class Meta:
         ordering = ['id']
@@ -116,18 +116,18 @@ class Component(models.Model):
         verbose_name='Рецепт',
         on_delete=models.CASCADE,
         related_name='components',
-        )
+    )
     ingredient = models.ForeignKey(
         'Ingredient',
         verbose_name='Ингредиент',
         on_delete=models.CASCADE,
         related_name='components',
-        )
+    )
 
     amount = models.PositiveSmallIntegerField(
         verbose_name='Количество',
         validators=[MinValueValidator(1)],
-        )
+    )
 
     class Meta:
         verbose_name = 'Компонент рецепта'
@@ -136,7 +136,7 @@ class Component(models.Model):
             models.UniqueConstraint(
                 fields=['recipe', 'ingredient'],
                 name='unique_component')
-            ]
+        ]
 
     def __str__(self):
         return f'{self.ingredient} {self.amount} шт'

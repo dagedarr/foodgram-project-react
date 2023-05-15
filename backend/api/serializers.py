@@ -1,11 +1,11 @@
 import base64
 
 from django.core.files.base import ContentFile
-from rest_framework import serializers
-
 from recipe.models import (Component, Favorite, Ingredient, Recipe,
                            ShoppingCart, Tag)
+from rest_framework import serializers
 from users.models import Subscribe, User
+
 from .utils import ingredients_set
 
 
