@@ -18,9 +18,9 @@ jobs:
         python -m pip install --upgrade pip 
         pip install flake8 pep8-naming flake8-broken-line flake8-return flake8-isort
         pip install -r backend/requirements.txt
-    - name: Test with flake8 python -m flake8
+    - name: Test with flake8
       run: |
-        ls
+        python -m flake8
 
   build_and_push_to_docker_hub:
       name: Push Docker images to Docker Hub
@@ -44,12 +44,12 @@ jobs:
           uses: docker/build-push-action@v2 
           with:
             push: true
-            context: ./foodgram/backend/
+            context: ./backend/
             tags: natolin/foodgram:latest
 
         - name: Push frontend's image to Docker Hub
           uses: docker/build-push-action@v2 
           with:
             push: true
-            context: ./foodgram/frontend/
+            context: ./frontend/
             tags: natolin/foodgram_frontend:latest
