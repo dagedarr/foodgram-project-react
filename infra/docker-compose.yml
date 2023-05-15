@@ -16,7 +16,7 @@ services:
       - static_value:/app/static/
       - media_value:/app/media/
     depends_on:
-      - frontend
+      - db
     env_file:
       - ./.env
 
@@ -39,6 +39,7 @@ services:
       - media_value:/var/html/media/
     depends_on:
       - web
+      - frontend
 
 volumes:
   database_postgres:
