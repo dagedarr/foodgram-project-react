@@ -13,8 +13,8 @@ def create_content(ingredients):
     content = 'Ваш список покупок:\n'
 
     for ingredient in ingredients:
-        content += (f"{ingredient['ingredient__name']} " + 
-                    f"({ingredient['ingredient__measurement_unit']}) " + 
-                    f"{ingredient['amount']}" +
-                    '\n')
+        content += (f"{ingredient['ingredient__name']} "
+                    + f"({ingredient['ingredient__measurement_unit']}) "
+                    + f"{ingredient['amount']}"
+                    + '\n')
     return content
