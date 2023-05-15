@@ -1,6 +1,5 @@
 version: '3.3'
 
-
 services:
   db:
     image: postgres:13.0-alpine
@@ -16,15 +15,15 @@ services:
       - static_value:/app/static/
       - media_value:/app/media/
     depends_on:
-      - db
+      - frontend
     env_file:
       - ./.env
 
   frontend:
-    image: natolin/foodgram_frontend:latest
-    volumes:
-      - ../frontend/:/app/result_build/
-    depends_on:
+   image: natolin/foodgram_frontend:latest
+   volumes:
+     - ../frontend/:/app/result_build/
+   depends_on:
       - db
 
   nginx:
@@ -39,9 +38,8 @@ services:
       - media_value:/var/html/media/
     depends_on:
       - web
-      - frontend
 
 volumes:
-  database_postgres:
   static_value:
   media_value:
+  database_postgres:
