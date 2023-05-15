@@ -166,6 +166,14 @@ class RecipeSerializer(serializers.ModelSerializer):
             )
         return data
 
+    def to_representation(self, instance):
+        return RecipeListSerializer(
+            instance,
+            context={
+                'request': self.context.get('request')
+            }
+        ).data
+
     def create(self, validated_data):
         """
         При POST-запросе создаем объект Рецепт,
