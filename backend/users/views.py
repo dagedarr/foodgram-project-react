@@ -14,7 +14,7 @@ from .serializers import (SubscribeSerializer, UserCreateSerializer,
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     pagination_class = CustomPagination
-    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
+    permission_classes = (permissions.AllowAny,)
 
     def get_serializer_class(self):
         if self.request.method in SAFE_METHODS:
