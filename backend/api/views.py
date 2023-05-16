@@ -1,3 +1,4 @@
+from api.filters import IngredientFilter, RecipeFilter
 from api.pagination import CustomPagination
 from django.db.models import Sum
 from django.http import HttpResponse
@@ -22,7 +23,8 @@ class IngredientViewSet(mixins.ListModelMixin,
                         viewsets.GenericViewSet):
     queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer
-    search_fields = ('^name',)
+    filter_backends = (DjangoFilterBackend,)
+    filter_class = IngredientFilter
 
 
 class RecipeViewSet(viewsets.ModelViewSet):
@@ -30,6 +32,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
     pagination_class = CustomPagination
     permission_classes = (IsAuthorOrReadOnly, )
     filter_backends = (DjangoFilterBackend,)
+    filterset_class = RecipeFilter
 
     def get_serializer_class(self):
         if self.request.method in SAFE_METHODS:
