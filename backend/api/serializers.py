@@ -149,18 +149,18 @@ class RecipeSerializer(serializers.ModelSerializer):
 
         cached_ingredient_id = set()
         for ingredient in ingredients:
-            if ingredient['id'] in cached_ingredient_id:
+            if int(ingredient['id']) in cached_ingredient_id:
                 raise serializers.ValidationError(
                     'Ингредиенты не могут повторяться'
                 )
             cached_ingredient_id.add(ingredient['id'])
 
-            if ingredient['amount'] <= 0:
+            if int(ingredient['amount']) <= 0:
                 raise serializers.ValidationError(
                     'Некорректный ввод количества ингредиентов'
                 )
 
-        if cooking_time <= 0:
+        if int(cooking_time) <= 0:
             raise serializers.ValidationError(
                 'Некорректный ввод времени готовки'
             )

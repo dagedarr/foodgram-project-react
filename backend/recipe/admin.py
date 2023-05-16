@@ -13,6 +13,7 @@ class IngredientAdmin(admin.ModelAdmin):
 class ComponentsInline(admin.TabularInline):
     """Класс для добавления компонентов при создании рецептов через админку."""
     model = Component
+    min_num = 1
 
 
 class RecipeAdmin(admin.ModelAdmin):
@@ -27,12 +28,6 @@ class RecipeAdmin(admin.ModelAdmin):
         return obj.favorite.count()
 
     favorite_count.short_description = 'Количество подписок'
-
-    # Не нашел что такое min_num, но помогло пеереопределить данный метод
-    def save_model(self, request, obj, form, change):
-        if not obj.ingredients.exists():
-            raise ValidationError('Список ингредиентов должен быть заполнен')
-        super().save_model(request, obj, form, change)
 
 
 class TagAdmin(admin.ModelAdmin):
