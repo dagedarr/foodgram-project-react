@@ -44,7 +44,7 @@ docker-compose up -d --build
 docker-compose exec web python manage.py migrate
 docker-compose exec web python manage.py createsuperuser
 docker-compose exec web python manage.py collectstatic --no-input
-docker-compose exec web python manage.py loaddata
+docker-compose exec web python manage.py loaddata dump.json
 ```
 Откройте браузер и перейдите по адресу http://127.0.0.1:8000/admin/. Введите имя пользователя и пароль администратора, чтобы войти в панель управления.
 
