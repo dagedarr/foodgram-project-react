@@ -2,6 +2,10 @@
 ![example workflow](https://github.com/dagedarr/foodgram-project-react/actions/workflows/main.yml/badge.svg)
 
 # Примеры запросов:
+admin-login : arnat
+admin-password : arnat
+
+
 http://158.160.44.148/
 http://158.160.44.148/api/
 http://158.160.44.148/admin/
